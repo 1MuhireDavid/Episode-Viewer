@@ -40,7 +40,6 @@ export default function Home() {
       episode.name.toLowerCase().includes(search.toLowerCase()) &&
       (season ? episode.episode.startsWith(season) : true)
   );
-
   return ( 
     <div className="container mx-auto p-6 text-center">
       <h1 className="text-4xl font-bold mb-6 text-[#04CC9D]">Rick and Morty Episodes</h1>
