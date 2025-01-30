@@ -1,26 +1,13 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Episode } from "@/lib/types";
+import { ApiResponse } from "@/lib/types";
+import FilterBar from "@/components/FilterBar"; 
+import EpisodeCard from "@/components/EpisodeCard"; // Import the new component
 
-const API_URL = "https://rickandmortyapi.com/api/episode";
-
-interface Episode {
-  id: number;
-  name: string;
-  air_date: string;
-  episode: string;
-}
-
-interface ApiResponse {
-  info: {
-    count: number;
-    pages: number;
-    next: string | null;
-    prev: string | null;
-  };
-  results: Episode[];
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL1;
 
 export default function Home() {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
@@ -31,7 +18,7 @@ export default function Home() {
   const [search, setSearch] = useState<string>("");
   const [season, setSeason] = useState<string>("");
 
-  useEffect(() => { 
+  useEffect(() => {
     const fetchEpisodes = async () => {
       setLoading(true);
       setError(null);
@@ -40,7 +27,7 @@ export default function Home() {
         setEpisodes(response.data.results);
         setInfo(response.data.info);
       } catch (err) {
-        setError("Failed to fetch episodes.");
+        setError("Failed to fetch episodes."+err);
       } finally {
         setLoading(false);
       }
@@ -48,56 +35,42 @@ export default function Home() {
     fetchEpisodes();
   }, [page]);
 
-  const filteredEpisodes = episodes.filter((episode) =>
-    episode.name.toLowerCase().includes(search.toLowerCase()) &&
-    (season ? episode.episode.startsWith(season) : true)
+  const filteredEpisodes = episodes.filter(
+    (episode) =>
+      episode.name.toLowerCase().includes(search.toLowerCase()) &&
+      (season ? episode.episode.startsWith(season) : true)
   );
 
-  return (
-    <div className="container mx-auto p-4 text-center">
-      <h1 className="text-4xl font-bold mb-6 text-green-500">Rick and Morty Episodes</h1>
-      <div className="mb-4 flex flex-col md:flex-row justify-center gap-4">
-        <input
-          type="text"
-          placeholder="Search episodes..."
-          className="p-2 border rounded w-full md:w-1/3"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className="p-2 border rounded w-full md:w-1/4"
-          value={season}
-          onChange={(e) => setSeason(e.target.value)}
-        >
-          <option value="">All Seasons</option>
-          {[...Array(5)].map((_, i) => (
-            <option key={i} value={`S0${i + 1}`}>
-              Season {i + 1}
-            </option>
-          ))}
-        </select>
+  return ( 
+    <div className="container mx-auto p-6 text-center">
+      <h1 className="text-4xl font-bold mb-6 text-[#04CC9D]">Rick and Morty Episodes</h1>
+
+      {/* Filter Component */}
+      <div className="mb-6">
+        <FilterBar search={search} setSearch={setSearch} season={season} setSeason={setSeason} />
       </div>
+
       {loading && <p className="text-yellow-500">Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
+
+      {/* Episodes Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {filteredEpisodes.map((episode) => (
-          <div key={episode.id} className="border p-6 rounded-lg shadow-lg bg-gray-800 text-white">
-            <h2 className="text-xl font-semibold mb-2">{episode.name}</h2>
-            <p className="text-gray-300">{episode.air_date}</p>
-            <p className="text-gray-400">{episode.episode}</p>
-          </div>
+          <EpisodeCard key={episode.id} episode={episode} />
         ))}
       </div>
+
+      {/* Pagination */}
       <div className="flex justify-center mt-6 space-x-4">
         <button
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="px-5 py-2 bg-gradient-to-tr from-[#04cc9d] via-[#1ea7ad] to-[#15a9ce] text-white rounded-lg hover:scale-105 transition-transform disabled:opacity-50"
           onClick={() => setPage(page - 1)}
           disabled={!info?.prev}
         >
           Previous
         </button>
         <button
-          className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+          className="px-5 py-2 bg-gradient-to-tr from-[#04cc9d] via-[#1ea7ad] to-[#15a9ce] text-white rounded-lg hover:scale-105 transition-transform disabled:opacity-50"
           onClick={() => setPage(page + 1)}
           disabled={!info?.next}
         >
